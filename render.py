@@ -8,8 +8,8 @@ import itertools
 import math
 from mathutils import Vector
 import os
-import yaml
 import random
+import json
 
 param_grid = {
     'coin_x_metres': [-0.5, -0.25, 0, 0.25, 0.5],
@@ -122,21 +122,23 @@ def thedirs(path):
 thedirs('ds')
 thedirs('ds/images')
 thedirs('ds/labels')
-
+thedirs('ds/meta')
 thedirs('ds/images/test')
 thedirs('ds/images/train')
 thedirs('ds/labels/test')
 thedirs('ds/labels/train')
+thedirs('ds/meta/test')
+thedirs('ds/meta/train')
 
 with open('ds/dataset.yml', 'w') as m:
-    yaml.dump({
-        'path': os.getcwd() + '/ds',
-        'train': 'images/train',
-        'test': 'images/test',
-        'names': {
-            0: '50cent'
-        }
-    }, m)
+    m.write(f"""\
+path: {os.getcwd()}/ds
+train: images/train
+test: images/test
+names:
+  0: 50cent
+""")
+
 
 
 for idx, grid in enumerate(grid_search(param_grid)):
@@ -148,10 +150,10 @@ for idx, grid in enumerate(grid_search(param_grid)):
 
     img_output_path = f'ds/images/{destiny}/{idx}.png'
     label_output_path = f'ds/labels/{destiny}/{idx}.txt'
-    meta_output_path = f'ds/meta/{destiny}/{idx}.yaml'
+    meta_output_path = f'ds/meta/{destiny}/{idx}.json'
 
     with open(meta_output_path, 'w') as meta:
-        yaml.dump(grid, meta)
+        json.dump(grid, meta, indent=4)
 
     print("Output: ", img_output_path)
     print("Rendering for settings", grid)
@@ -194,6 +196,3 @@ for idx, grid in enumerate(grid_search(param_grid)):
         #ulx, uly, lrx, lry = get_object_render_bbox(obj)
         x_center, y_center, width, height = box_to_yolo(*get_object_render_bbox(obj), w, h)
         l.write(f'0 {x_center} {y_center} {width} {height}')
-
-    # x 319, y 1807
-    # x 416, y 1889
